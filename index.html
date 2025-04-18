@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced TSP Solver</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.css">
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+        }
+
+        [data-bs-theme="dark"] {
+            --bg-color: #212529;
+            --text-color: #f8f9fa;
+            --border-color: #495057;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .matrix-input {
+            width: 80px !important;
+            padding: 4px !important;
+            text-align: center;
+        }
+
+        .city-input {
+            width: 120px !important;
+        }
+
+        #canvas-container {
+            margin-top: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            background-color: var(--bg-color);
+            height: 400px;
+        }
+
+        .card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background-color: var(--bg-color);
+            border-color: var(--border-color);
+        }
+
+        .solution-path {
+            font-size: 1.2em;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-10">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h2 class="mb-0">Advanced TSP Solver</h2>
+                        <button class="btn btn-outline-light theme-toggle" onclick="toggleTheme()">
+                            <i class="bi bi-moon-stars theme-icon"></i>
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="cities" class="form-label">Number of Cities:</label>
+                                    <div class="input-group">
+                                        <input type="number" id="cities" class="form-control" min="2" max="20" value="4">
+                                        <button class="btn btn-outline-primary" onclick="generateMatrix()">
+                                            <i class="bi bi-grid-3x3"></i> Generate Matrix
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Solver Algorithm:</label>
+                                    <select class="form-select" id="algorithm">
+                                        <option value="bruteforce">Brute Force (Exact)</option>
+                                        <option value="dp">Dynamic Programming (Held-Karp)</option>
+                                        <option value="genetic">Genetic Algorithm</option>
+                                        <option value="annealing">Simulated Annealing</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Matrix Type:</label>
+                                    <div class="btn-group w-100">
+                                        <button class="btn btn-outline-secondary" onclick="generateRandomMatrix()">
+                                            <i class="bi bi-shuffle"></i> Random
+                                        </button>
+                                        <button class="btn btn-outline-secondary" onclick="clearMatrix()">
+                                            <i class="bi bi-eraser"></i> Clear
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Data Management:</label>
+                                    <div class="btn-group w-100">
+                                        <button class="btn btn-outline-success" onclick="exportData()">
+                                            <i class="bi bi-download"></i> Export
+                                        </button>
+                                        <button class="btn btn-outline-success" onclick="document.getElementById('importFile').click()">
+                                            <i class="bi bi-upload"></i> Import
+                                        </button>
+                                        <input type="file" id="importFile" style="display: none" accept=".json,.csv" onchange="importData(event)">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="useMap" onchange="toggleMapMode()">
+                                    <label class="form-check-label" for="useMap">Use Real-World Map</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="matrix-container" class="table-responsive mt-3"></div>
+
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <button class="btn btn-success w-100" onclick="solveTSP()">
+                                    <i class="bi bi-play-circle"></i> Solve TSP
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="result" class="alert alert-info mt-3" style="display: none;">
+                            <h5><i class="bi bi-info-circle"></i> Solution</h5>
+                            <div class="solution-path"></div>
+                            <div class="total-cost mt-2"></div>
+                        </div>
+
+                        <div id="canvas-container" class="mt-3">
+                            <canvas id="visualization" width="600" height="400"></canvas>
+                            <div id="map" style="display: none; height: 400px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let bestPath = [];
+        let cities = [];
+        let map = null;
+        let markers = [];
+        let cityNames = [];
+        let chart = null;
+
+        function clearMatrix() {
+            let n = parseInt(document.getElementById('cities').value);
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    if (i !== j) {
+                        document.getElementById(`cell_${i}_${j}`).value = '';
+                    }
+                }
+            }
+            cities = [];
+            bestPath = [];
+            updateVisualization();
+        }
+
+        // Theme toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.getAttribute('data-bs-theme') === 'dark';
+            const newTheme = isDark ? 'light' : 'dark';
+            html.setAttribute('data-bs-theme', newTheme);
+
+            // Update icon
+            const icon = document.querySelector('.theme-icon');
+            icon.classList.remove('bi-moon-stars', 'bi-sun');
+            icon.classList.add(isDark ? 'bi-moon-stars' : 'bi-sun');
+
+            // Update button color
+            const btn = document.querySelector('.theme-toggle');
+            btn.classList.remove('btn-outline-light', 'btn-outline-dark');
+            btn.classList.add(isDark ? 'btn-outline-light' : 'btn-outline-dark');
+
+            updateVisualization();
+        }
+
+        // Map mode
+        function toggleMapMode() {
+            const useMap = document.getElementById('useMap').checked;
+            const canvas = document.getElementById('visualization');
+            const mapDiv = document.getElementById('map');
+
+            if (useMap) {
+                canvas.style.display = 'none';
+                mapDiv.style.display = 'block';
+                if (!map) {
+                    map = L.map('map').setView([0, 0], 2);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors'
+                    }).addTo(map);
+                }
+            } else {
+                canvas.style.display = 'block';
+                mapDiv.style.display = 'none';
+                updateVisualization();
+            }
+        }
+
+        // Data import/export
+        function exportData() {
+            const data = {
+                cities: cities,
+                names: cityNames,
+                matrix: getMatrix()
+            };
+            const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'tsp_data.json';
+            a.click();
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = JSON.parse(e.target.result);
+                cities = data.cities;
+                cityNames = data.names;
+                document.getElementById('cities').value = cities.length;
+                generateMatrix();
+                const matrix = data.matrix;
+                for (let i = 0; i < matrix.length; i++) {
+                    for (let j = 0; j < matrix.length; j++) {
+                        document.getElementById(`cell_${i}_${j}`).value = matrix[i][j];
+                    }
+                }
+                updateVisualization();
+            };
+            reader.readAsText(file);
+        }
+
+        function generateMatrix() {
+            let n = parseInt(document.getElementById('cities').value);
+            if (n < 2 || n > 20) {
+                alert('Please enter a number between 2 and 20');
+                return;
+            }
+            
+            // Preserve existing city names or create new ones
+            let oldCityNames = [...(cityNames || [])];
+            cityNames = Array(n).fill().map((_, i) => oldCityNames[i] || `City ${i}`);
+            
+            let container = document.getElementById('matrix-container');
+            container.innerHTML = '<h5 class="mb-3">Distance Matrix</h5>';
+            let table = '<table class="table table-bordered table-sm">';
+            
+            // Header row with city names input
+            table += '<tr><th></th>';
+            for (let i = 0; i < n; i++) {
+                table += `<th class="text-center"><input type="text" id="city_name_${i}" class="form-control city-input" value="${cityNames[i]}" onchange="updateCityName(${i})"></th>`;
+            }
+            table += '</tr>';
+
+            // Matrix rows
+            for (let i = 0; i < n; i++) {
+                table += `<tr><th class="text-center"><span class="city-label" id="city_label_${i}">${cityNames[i]}</span></th>`;
+                for (let j = 0; j < n; j++) {
+                    let value = i === j ? '0' : '';
+                    table += `<td><input type="number" id="cell_${i}_${j}" class="form-control matrix-input" value="${value}" ${i === j ? 'disabled' : ''} onchange="updateCost()"></td>`;
+                }
+                table += '</tr>';
+            }
+            table += '</table>';
+            container.innerHTML += table;
+            generateRandomMatrix();
+        }
+
+        function updateCityName(index) {
+            const name = document.getElementById(`city_name_${index}`).value;
+            cityNames[index] = name;
+            document.getElementById(`city_label_${index}`).textContent = name;
+            if (map && markers[index]) {
+                markers[index].bindPopup(name);
+            }
+            updateVisualization();
+        }
+
+        function updateCost() {
+            const algorithm = document.getElementById('algorithm').value;
+            solveTSP();
+        }
+
+        function generateRandomMatrix() {
+            let n = parseInt(document.getElementById('cities').value);
+            cities = [];
+            
+            if (document.getElementById('useMap').checked) {
+                // Generate random coordinates around the world
+                for (let i = 0; i < n; i++) {
+                    cities.push({
+                        x: Math.random() * 360 - 180, // longitude
+                        y: Math.random() * 170 - 85   // latitude
+                    });
+                }
+                updateMapMarkers();
+            } else {
+                // Generate random city coordinates for canvas
+                for (let i = 0; i < n; i++) {
+                    cities.push({
+                        x: Math.random() * 500 + 50,
+                        y: Math.random() * 300 + 50
+                    });
+                }
+            }
+
+            // Fill matrix with distances
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    if (i !== j) {
+                        let distance;
+                        if (document.getElementById('useMap').checked) {
+                            distance = Math.floor(getHaversineDistance(
+                                cities[i].y, cities[i].x,
+                                cities[j].y, cities[j].x
+                            ));
+                        } else {
+                            distance = Math.floor(Math.sqrt(
+                                Math.pow(cities[i].x - cities[j].x, 2) + 
+                                Math.pow(cities[i].y - cities[j].y, 2)
+                            ));
+                        }
+                        document.getElementById(`cell_${i}_${j}`).value = distance;
+                    }
+                }
+            }
+            updateVisualization();
+        }
+
+        function getHaversineDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Earth's radius in km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        function updateMapMarkers() {
+            if (!map) return;
+
+            // Clear existing markers
+            if (markers) {
+                markers.forEach(marker => marker && map.removeLayer(marker));
+            }
+            markers = [];
+
+            // Add new markers
+            cities.forEach((city, i) => {
+                if (city) {
+                    const marker = L.marker([city.y, city.x])
+                        .bindPopup(cityNames[i] || `City ${i}`)
+                        .addTo(map);
+                    markers.push(marker);
+                }
+            });
+
+            // Fit bounds to show all markers
+            if (markers.length > 0) {
+                const group = new L.featureGroup(markers);
+                map.fitBounds(group.getBounds().pad(0.1));
+            }
+        }
+
+        function clearMatrix() {
+            let n = parseInt(document.getElementById('cities').value);
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    if (i !== j) {
+                        document.getElementById(`cell_${i}_${j}`).value = '';
+                    }
+                }
+            }
+            cities = [];
+            drawCities();
+        }
+
+        function getMatrix() {
+            const n = parseInt(document.getElementById('cities').value);
+            const matrix = [];
+            for (let i = 0; i < n; i++) {
+                matrix[i] = [];
+                for (let j = 0; j < n; j++) {
+                    matrix[i][j] = parseInt(document.getElementById(`cell_${i}_${j}`).value) || 0;
+                }
+            }
+            return matrix;
+        }
+
+        function solveTSP() {
+            const n = parseInt(document.getElementById('cities').value);
+            const graph = getMatrix();
+            const algorithm = document.getElementById('algorithm').value;
+            let result;
+
+            switch (algorithm) {
+                case 'bruteforce':
+                    result = solveBruteForce(graph);
+                    break;
+                case 'dp':
+                    result = solveHeldKarp(graph);
+                    break;
+                case 'genetic':
+                    result = solveGenetic(graph);
+                    break;
+                case 'annealing':
+                    result = solveSimulatedAnnealing(graph);
+                    break;
+            }
+
+            let resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            
+            // Format the path using city names
+            let pathStr = bestPath.map(x => cityNames[x]).join(' → ') + ' → ' + cityNames[bestPath[0]];
+            resultDiv.querySelector('.solution-path').innerHTML = pathStr;
+            resultDiv.querySelector('.total-cost').innerHTML = `Total Distance: ${result}`;
+            
+            updateVisualization();
+        }
+
+        function solveBruteForce(graph) {
+            let n = graph.length;
+            let visited = Array(n).fill(false);
+            visited[0] = true;
+            bestPath = [0];
+            return tsp(graph, visited, 0, 1, 0, Infinity, [0]);
+        }
+
+        function solveHeldKarp(graph) {
+            const n = graph.length;
+            const dp = new Map();
+            const next = new Map();
+
+            // Initialize for single cities
+            for (let i = 1; i < n; i++) {
+                dp.set(`${i},${1 << i}`, [graph[0][i], 0]);
+            }
+
+            // Iterate through all subsets of cities
+            for (let size = 2; size < n; size++) {
+                for (let subset of combinations(n - 1, size)) {
+                    let bits = (1 << 0);
+                    subset.forEach(bit => bits |= (1 << bit));
+
+                    for (let next of subset) {
+                        let prevBits = bits & ~(1 << next);
+                        let minDist = Infinity;
+                        let minPrev = -1;
+
+                        for (let prev of subset) {
+                            if (prev === next) continue;
+                            let dist = dp.get(`${prev},${prevBits}`)[0] + graph[prev][next];
+                            if (dist < minDist) {
+                                minDist = dist;
+                                minPrev = prev;
+                            }
+                        }
+
+                        dp.set(`${next},${bits}`, [minDist, minPrev]);
+                    }
+                }
+            }
+
+            // Find optimal solution
+            let bits = (1 << n) - 1;
+            let minDist = Infinity;
+            let lastCity = -1;
+
+            for (let i = 1; i < n; i++) {
+                let dist = dp.get(`${i},${bits}`)[0] + graph[i][0];
+                if (dist < minDist) {
+                    minDist = dist;
+                    lastCity = i;
+                }
+            }
+
+            // Reconstruct path
+            bestPath = [];
+            let curr = lastCity;
+            let currBits = bits;
+            while (curr !== 0) {
+                bestPath.unshift(curr);
+                let [_, prev] = dp.get(`${curr},${currBits}`);
+                currBits &= ~(1 << curr);
+                curr = prev;
+            }
+            bestPath.unshift(0);
+
+            return minDist;
+        }
+
+        function solveGenetic(graph) {
+            const populationSize = 50;
+            const generations = 100;
+            const mutationRate = 0.01;
+            let population = [];
+            const n = graph.length;
+
+            // Initialize population
+            for (let i = 0; i < populationSize; i++) {
+                let chromosome = Array.from({length: n-1}, (_, i) => i + 1);
+                shuffleArray(chromosome);
+                chromosome.unshift(0);
+                population.push(chromosome);
+            }
+
+            // Evolution
+            for (let gen = 0; gen < generations; gen++) {
+                // Evaluate fitness
+                let fitness = population.map(p => 1 / calculatePathCost(p, graph));
+                let totalFitness = fitness.reduce((a, b) => a + b, 0);
+
+                // Selection and crossover
+                let newPopulation = [];
+                while (newPopulation.length < populationSize) {
+                    let parent1 = selectParent(population, fitness, totalFitness);
+                    let parent2 = selectParent(population, fitness, totalFitness);
+                    let [child1, child2] = crossover(parent1, parent2);
+                    newPopulation.push(child1, child2);
+                }
+
+                // Mutation
+                for (let i = 0; i < populationSize; i++) {
+                    if (Math.random() < mutationRate) {
+                        mutate(newPopulation[i]);
+                    }
+                }
+
+                population = newPopulation;
+            }
+
+            // Find best solution
+            let bestCost = Infinity;
+            let bestSolution = null;
+
+            for (let solution of population) {
+                let cost = calculatePathCost(solution, graph);
+                if (cost < bestCost) {
+                    bestCost = cost;
+                    bestSolution = solution;
+                }
+            }
+
+            bestPath = bestSolution;
+            return bestCost;
+        }
+
+        function solveSimulatedAnnealing(graph) {
+            const n = graph.length;
+            const initialTemp = 100;
+            const finalTemp = 0.01;
+            const coolingRate = 0.995;
+            let currentTemp = initialTemp;
+
+            // Start with a random solution
+            bestPath = Array.from({length: n-1}, (_, i) => i + 1);
+            shuffleArray(bestPath);
+            bestPath.unshift(0);
+            let currentPath = [...bestPath];
+            let currentCost = calculatePathCost(currentPath, graph);
+            let bestCost = currentCost;
+
+            while (currentTemp > finalTemp) {
+                // Generate neighbor by swapping two cities
+                let newPath = [...currentPath];
+                let i = 1 + Math.floor(Math.random() * (n - 1));
+                let j = 1 + Math.floor(Math.random() * (n - 1));
+                [newPath[i], newPath[j]] = [newPath[j], newPath[i]];
+
+                let newCost = calculatePathCost(newPath, graph);
+                let delta = newCost - currentCost;
+
+                // Accept if better or with probability
+                if (delta < 0 || Math.random() < Math.exp(-delta / currentTemp)) {
+                    currentPath = newPath;
+                    currentCost = newCost;
+
+                    if (currentCost < bestCost) {
+                        bestPath = [...currentPath];
+                        bestCost = currentCost;
+                    }
+                }
+
+                currentTemp *= coolingRate;
+            }
+
+            return bestCost;
+        }
+
+        // Helper functions for algorithms
+        function combinations(n, r) {
+            const result = [];
+            const subset = [];
+
+            function generate(k, start) {
+                if (k === r) {
+                    result.push([...subset]);
+                    return;
+                }
+                for (let i = start; i < n; i++) {
+                    subset.push(i);
+                    generate(k + 1, i + 1);
+                    subset.pop();
+                }
+            }
+
+            generate(0, 0);
+            return result;
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function calculatePathCost(path, graph) {
+            let cost = 0;
+            for (let i = 0; i < path.length - 1; i++) {
+                cost += graph[path[i]][path[i + 1]];
+            }
+            cost += graph[path[path.length - 1]][path[0]];
+            return cost;
+        }
+
+        function selectParent(population, fitness, totalFitness) {
+            let r = Math.random() * totalFitness;
+            let sum = 0;
+            for (let i = 0; i < population.length; i++) {
+                sum += fitness[i];
+                if (sum > r) return [...population[i]];
+            }
+            return [...population[population.length - 1]];
+        }
+
+        function crossover(parent1, parent2) {
+            const n = parent1.length;
+            const point = 1 + Math.floor(Math.random() * (n - 1));
+            
+            let child1 = parent1.slice(0, point);
+            let child2 = parent2.slice(0, point);
+            
+            for (let i of parent2) {
+                if (!child1.includes(i)) child1.push(i);
+            }
+            for (let i of parent1) {
+                if (!child2.includes(i)) child2.push(i);
+            }
+            
+            return [child1, child2];
+        }
+
+        function mutate(path) {
+            const i = 1 + Math.floor(Math.random() * (path.length - 1));
+            const j = 1 + Math.floor(Math.random() * (path.length - 1));
+            [path[i], path[j]] = [path[j], path[i]];
+        }
+
+        function tsp(graph, visited, currPos, count, cost, ans, path) {
+            let n = graph.length;
+            if (count === n && graph[currPos][0] > 0) {
+                let totalCost = cost + graph[currPos][0];
+                if (totalCost < ans) {
+                    ans = totalCost;
+                    bestPath = [...path];
+                }
+                return totalCost;
+            }
+            
+            let minAns = ans;
+            for (let i = 0; i < n; i++) {
+                if (!visited[i] && graph[currPos][i] > 0) {
+                    visited[i] = true;
+                    path.push(i);
+                    let newAns = tsp(graph, visited, i, count + 1, cost + graph[currPos][i], minAns, path);
+                    minAns = Math.min(minAns, newAns);
+                    path.pop();
+                    visited[i] = false;
+                }
+            }
+            return minAns;
+        }
+
+        function updateVisualization() {
+            if (document.getElementById('useMap').checked) {
+                updateMapMarkers();
+                if (bestPath.length > 0) {
+                    // Draw path on map
+                    const pathCoords = bestPath.map(i => [cities[i].y, cities[i].x]);
+                    pathCoords.push([cities[bestPath[0]].y, cities[bestPath[0]].x]); // Close the loop
+                    
+                    if (window.currentPath) {
+                        map.removeLayer(window.currentPath);
+                    }
+                    window.currentPath = L.polyline(pathCoords, {color: 'red'}).addTo(map);
+                }
+            } else {
+                const canvas = document.getElementById('visualization');
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Set colors based on theme
+                const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+                const textColor = isDark ? '#fff' : '#000';
+                const cityColor = isDark ? '#0dcaf0' : '#0d6efd';
+                const pathColor = isDark ? '#00ff00' : '#198754';
+
+                // Draw cities
+                cities.forEach((city, i) => {
+                    ctx.beginPath();
+                    ctx.arc(city.x, city.y, 5, 0, 2 * Math.PI);
+                    ctx.fillStyle = cityColor;
+                    ctx.fill();
+                    ctx.fillStyle = textColor;
+                    ctx.fillText(cityNames[i], city.x + 10, city.y + 10);
+                });
+
+                // Draw path if solution exists
+                if (bestPath.length > 0) {
+                    ctx.beginPath();
+                    ctx.strokeStyle = pathColor;
+                    ctx.lineWidth = 2;
+                    
+                    let first = true;
+                    for (let i = 0; i < bestPath.length; i++) {
+                        let cityIndex = bestPath[i];
+                        if (first) {
+                            ctx.moveTo(cities[cityIndex].x, cities[cityIndex].y);
+                            first = false;
+                        } else {
+                            ctx.lineTo(cities[cityIndex].x, cities[cityIndex].y);
+                        }
+                    }
+                    ctx.lineTo(cities[bestPath[0]].x, cities[bestPath[0]].y);
+                    ctx.stroke();
+                }
+            }
+        }
+
+        // Wait for DOM to be ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize map
+            const mapDiv = document.getElementById('map');
+            if (mapDiv) {
+                map = L.map('map').setView([0, 0], 2);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+            }
+
+            // Initialize with default cities
+            generateMatrix();
+        });
+    </script>
+</body>
+</html>
