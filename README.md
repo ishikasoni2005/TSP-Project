@@ -1,4 +1,4 @@
-# 🚀 Advanced Travelling Salesman Problem (TSP) Visual Solver
+# 🚀 Advanced Travelling Salesman Problem(TSP) Visual Solver
 
 Welcome to the **Advanced TSP Visual Solver** — where classic computer science meets interactive and intuitive visuals! 🎨✨
 
