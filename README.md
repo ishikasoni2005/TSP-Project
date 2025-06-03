@@ -1,61 +1,60 @@
 # 🚀 Advanced Travelling Salesman Problem (TSP) Visual Solver
 
-Welcome to the **Advanced TSP Visual Solver** — where classic computer science meets stunning, interactive visuals! 🎨✨
+Welcome to the **Advanced TSP Visual Solver** — where classic computer science meets interactive and intuitive visuals! 🎨✨
 
-This collaborative project takes the notoriously tricky Travelling Salesman Problem and makes it easy to explore, understand, and even have fun with. Whether you’re a fellow coder, a student, or just curious, dive in to see algorithms in action!
+This project tackles the famously challenging Travelling Salesman Problem, helping users explore different algorithms through clear, engaging visualizations. Whether you're a student, coder, or simply curious about optimization, this tool offers hands-on insight into how TSP can be solved.
 
 ---
 
 ## 🧩 What is the Travelling Salesman Problem?
 
-Imagine a salesman who needs to visit a list of cities — but wants to travel the shortest possible distance without repeating stops. This problem, deceptively simple to state, is a cornerstone challenge in optimization and computer science.
+The Travelling Salesman Problem (TSP) asks: Given a list of cities, what is the shortest possible route that visits each city exactly once and returns to the starting point? It’s a fundamental problem in computer science and optimization, known for its complexity as the number of cities grows.
 
-Our project implements and visualizes several powerful strategies to solve TSP efficiently:
+Our solver implements several advanced algorithms to approach this problem and visualizes how each method finds a solution.
 
 ---
 
 ## ✨ Key Features
 
-- 🔍 **Diverse Algorithms**:  
-  - Brute Force (Exhaustive search)  
-  - Dynamic Programming (Optimal substructure)  
-  - Genetic Algorithm (Nature-inspired evolution)  
-  - Simulated Annealing (Probabilistic optimization)  
+- 🔍 **Multiple Algorithms Included:**  
+  - **Brute Force:** Checks all possible routes to find the absolute shortest (computationally expensive).  
+  - **Dynamic Programming:** Uses optimal substructure to prune the search space for efficient exact solutions.  
+  - **Genetic Algorithm:** Mimics natural selection processes to evolve good routes over generations.  
+  - **Simulated Annealing:** Applies probabilistic techniques to escape local minima and improve solutions.
 
-- 🗺️ **Dual Visualization Modes**:  
-  - Real-world maps powered by **Leaflet.js** for geographic intuition  
-  - Canvas-based graphics for a clean, customizable visual experience  
+- 🗺️ **Two Visualization Modes:**  
+  - **Real-World Maps:** Powered by **Leaflet.js** for geographic context and realistic exploration.  
+  - **Canvas Graphics:** Clean, abstract visuals for custom animations and algorithm tracking.
 
-- 📥 **Import & Export** your city data effortlessly with JSON  
+- 📥 **Data Handling:** Easily import and export city datasets in JSON format for flexibility.
 
-- ⚙️ Intuitive, user-friendly controls to tweak and watch algorithms solve in real time  
+- ⚙️ **Interactive Controls:** Tweak algorithm parameters, pause/resume animations, and watch the solving process step-by-step.
 
-- 📱 Fully **responsive UI** to look great on desktop and mobile  
+- 📱 **Responsive UI:** Designed to work seamlessly on desktop and mobile devices.
 
 ---
 
 ## 🎨 My Role & Contributions
 
-I shaped the **look and feel** of this project — transforming complex ideas into an approachable experience:
+I was responsible for shaping the **user interface and user experience**, making sure the project is approachable and visually clear:
 
-- Designed and developed the **HTML & CSS** foundation for a sleek, modern interface  
-- Built **basic JavaScript** to manage UI events and user interactions smoothly  
-- Collaborated closely with teammates who crafted the heart of the algorithms and dynamic visualizations  
+- Designed and developed the **HTML5 & CSS3** layout and styling for a modern, clean look.  
+- Built foundational **JavaScript** code to manage UI events, user interactions, and data flow smoothly.  
+- Coordinated with teammates who focused on the core algorithm implementations and map/chart visualizations to integrate features cohesively.
+
+---
+
+## 🤝 Team Roles
+
+- **Ishika Soni:** UI/UX design, front-end structure, and user interaction management.  
+- **Jatin Saini:** Implemented the TSP algorithms and optimization logic.  
+- **Jasmeet Singh:** Developed map visualizations using **Leaflet.js**.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **HTML5** & **CSS3** for semantic markup and styling  
-- **Vanilla JavaScript** powering user interaction  
-- **Leaflet.js** for interactive maps *(implemented by teammates)*  
-- **Chart.js** for dynamic data visualizations *(implemented by teammates)*  
-
----
-
-## 🚀 Get Started in Seconds!
-
-1. Clone this repo:
-
-   ```bash
-   git clone https://github.com/ishikasoni2005/TSP-Project.git
+- **HTML5** & **CSS3** — Semantic markup and styling.  
+- **Vanilla JavaScript** — UI interaction and control logic.  
+- **Leaflet.js** — Interactive map visualizations.  
+- **Chart.js** — Dynamic data visualization charts.
