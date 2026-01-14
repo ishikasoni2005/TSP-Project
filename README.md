@@ -48,7 +48,7 @@ I was responsible for shaping the **user interface and user experience**, making
 
 - **Ishika:** UI/UX design, front-end structure, and user interaction management.  
 - **Jatin Saini:** Implemented the TSP algorithms and optimization logic.  
-- **Jasmeet Singh:** Developed map visualizations using **Leaflet.js**+**Chart.js** — Dynamic data visualization charts..
+- **Jasmeet Singh:** Developed map visualizations using **Leaflet.js**+**Chart.js** — Dynamic data visualization charts
 
 ---
 
