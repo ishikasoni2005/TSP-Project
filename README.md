@@ -3,7 +3,6 @@
 A full-stack TSP playground built with React, Vite, TailwindCSS, Django REST Framework, and Django Channels.
 
 This project upgrades the original single-file HTML/JS prototype into a scalable architecture with:
-
 - React-based visualization and dataset management
 - Django APIs for persistence and solving
 - WebSocket progress streaming for live route updates
